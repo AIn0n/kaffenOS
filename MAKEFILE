@@ -1,0 +1,8 @@
+CC=~/opt/cross/bin/i386-elf-gcc
+FLAGS=-O0 -g -std=gnu99 -ffreestadning
+
+kernel.o: kernel.c
+	$(CC) $(FLAGS) -c kernel.o kernel.c
+
+boot.o: boot.s
+	$(CC) $(FLAGS) -c boot.o boot.s

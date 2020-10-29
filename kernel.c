@@ -16,11 +16,13 @@ int term_row = 0;
 
 void term_init()
 {
+    size_t index;
     for(int col = 0; col < VGA_ROWS; ++col)
     {
         for(int row = 0; row < VGA_ROWS; ++row)
         {
-            //NOT DONE YET
+            index = (VGA_COLS * row) + col;
+            
         }
     }
 }
