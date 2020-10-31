@@ -1,8 +1,0 @@
-CC=~/opt/cross/bin/i686-elf-gcc
-FLAGS=-g -std=gnu99 -ffreestanding
-
-kernel.o: kernel.c
-	$(CC) $(FLAGS) -c kernel.o kernel.c
-
-boot.o: boot.s
-	$(CC) $(FLAGS) -c boot.o boot.s

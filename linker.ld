@@ -3,13 +3,13 @@ ENTRY(start)
 SECTIONS
 {
     /*kernel is loaded after 1M of memory*/
-    .= 1M;
+    . = 1M;
 
     /*everything aligned to multiples of 4kB */
     /*exec code*/
     .rodata BLOCK(4K) : ALIGN(4K)
     {
-        *(.mulitboot)
+        *(.multiboot)
     }
 
     /* Read-only data*/
