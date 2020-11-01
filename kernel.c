@@ -57,9 +57,8 @@ void term_print(const char* str){
     for(size_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
 }
 
-int kernel_main (void) 
+void kernel_main (void) 
 {
     term_init();
     term_print("kaffenOS\nSMACZNEJ KAWIUSI");
-    return 0;
 }

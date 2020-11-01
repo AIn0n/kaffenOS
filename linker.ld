@@ -1,4 +1,4 @@
-ENTRY(start)
+ENTRY(_start)
 
 SECTIONS
 {
@@ -7,14 +7,9 @@ SECTIONS
 
     /*everything aligned to multiples of 4kB */
     /*exec code*/
-    .rodata BLOCK(4K) : ALIGN(4K)
-    {
-        *(.multiboot)
-    }
-
-    /* Read-only data*/
     .text BLOCK(4K) : ALIGN(4K)
     {
+        *(.multiboot)
         *(.rodata)
     }
 
