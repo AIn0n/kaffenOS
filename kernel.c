@@ -50,15 +50,15 @@ static void gdt_set_gate(   int         num,
 
 extern void gdt_flush(uint32_t ptr)
 {
+    __asm__ __volatile__("lgdt (%0)"::"p"(ptr));
+
     __asm__(
-        "mov eax, [esp + 4]\n"
-        "lgdt [eax]\n"
-        "mov ds, ax\n"
-        "mov es, ax\n"
-        "mov fs, ax\n"
-        "mov gs, ax\n"
-        "mov ss, ax\n"
-        "ret\n"
+        "movl $0x10, %eax\n"
+        "movw %ax, %ss\n"
+        "movw %ax, %ds\n"
+        "movw %ax, %es\n"
+        "movw %ax, %fs\n"
+        "movw %ax, %gs\n"
     );
 }
 
