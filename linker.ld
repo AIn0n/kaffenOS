@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(start)
 
 SECTIONS
 {
@@ -10,19 +10,25 @@ SECTIONS
     .text BLOCK(4K) : ALIGN(4K)
     {
         *(.multiboot)
-        *(.rodata)
+        text = .;
+        *(.text)
     }
 
-    /* Read-write data (init) */
+    
     .data BLOCK(4K) : ALIGN(4K)
     {
+        /* Read-write data (init) */
         *(.data)
+        /* read only data */
+        *(.rodata)
     }
 
     /*Read-write data (uninit) */
     .bss BLOCK(4K) : ALIGN(4K)
     {
+        bss = .;
         *(COMMON)
         *(.bss)
     }
+    end = .; _end = .; __end = .;
 }

@@ -20,63 +20,6 @@ typedef struct gdt_entry_struct gdt_entry_t;
 //should always be zero                     5
 //available for system(always zero)         4
 
-struct gdt_ptr_struct
-{
-    uint16_t limit;
-    uint32_t base;
-}__attribute__((packed));
-typedef struct gdt_ptr_struct gdt_ptr_t;
-
-gdt_entry_t gdt_entries[5];
-gdt_ptr_t gdt_ptr;
-
-static void gdt_set_gate(   int         num, 
-                            uint32_t    base, 
-                            uint32_t    limit, 
-                            uint8_t     access, 
-                            uint8_t     gran)
-{
-    gdt_entries[num].base_low       = (base & 0xFFFF);
-    gdt_entries[num].base_mid       = (base >> 16) & 0xFF;
-    gdt_entries[num].base_high      = (base >> 24) & 0xFF;
-    
-    gdt_entries[num].limit_low      = (limit & 0xFFFF);
-
-    gdt_entries[num].granularity    = (limit >> 16) & 0x0F;
-    gdt_entries[num].granularity    |= gran & 0xF0;
-
-    gdt_entries[num].access = access;
-}
-
-extern void gdt_flush(uint32_t ptr)
-{
-    __asm__ __volatile__("lgdt (%0)"::"p"(ptr));
-
-    __asm__(
-        "movl $0x10, %eax\n"
-        "movw %ax, %ss\n"
-        "movw %ax, %ds\n"
-        "movw %ax, %es\n"
-        "movw %ax, %fs\n"
-        "movw %ax, %gs\n"
-    );
-}
-
-static void init_gdt()
-{
-    gdt_ptr.limit = (sizeof(gdt_entry_t) * 5) - 1;
-    gdt_ptr.base = (uint32_t) &gdt_entries;
-
-    gdt_set_gate(0, 0, 0, 0 , 0);       //NULL
-    gdt_set_gate(1, 9, 0xFFFFFFFF, 0x9A, 0xCF);    //krnl code segm
-    gdt_set_gate(2, 9, 0xFFFFFFFF, 0x92, 0xCF);    //krnl data segm
-    gdt_set_gate(3, 9, 0xFFFFFFFF, 0xFA, 0xCF);    //user code segm
-    gdt_set_gate(4, 9, 0xFFFFFFFF, 0xF2, 0xCF);    //user data segm
-
-    gdt_flush((uint32_t) &gdt_ptr);
-}
-
-
 
 //for vga display
 volatile uint16_t* vga_buffer = (uint16_t *) 0xB8000;
@@ -134,11 +77,8 @@ void term_print(const char* str){
     for(size_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
 }
 
-void kernel_main (void) 
+void main (void) 
 {
     term_init();
     term_print("kaffenOS\nNIEDZIELA WIECZOR I HUMOR POPSUTY\n");
-
-    init_gdt();
-    term_print("gdt initialized\n");
 }
