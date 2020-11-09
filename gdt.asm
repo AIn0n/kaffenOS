@@ -11,3 +11,10 @@ gdt_flush:
     jmp 0x08:.flush     ;offest of our code segment
 .flush:
     ret
+
+[GLOBAL idt_flush]  ;called from C func
+
+idt_flush:
+    mov eax, [esp+4]    ;get pointer to IDT passed as c param
+    lidt [eax]          ;load idt pointer
+    ret
