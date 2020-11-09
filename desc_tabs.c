@@ -45,7 +45,7 @@ static void init_gdt()
 }
 
 //IDT
-/*
+
 uint8_t idt_set_flags(uint8_t present, uint8_t privilage_lvl)
 {
     uint8_t ret = 14;               //bits between 4-1 are always 0b01110, 0xE, 0d14
@@ -70,7 +70,10 @@ static void init_idt()
     idt_ptr.limit = sizeof(idt_entry_t) * 256 -1;
     idt_ptr.base = (uint32_t) &idt_entries;
 
-    memset(&idt_entries, 0, sizeof(idt_entry_t) * 256);
+    uint8_t *ptr = (uint8_t*) &idt_entries;
+    uint16_t idt_size = sizeof(idt_entry_t) * 256;
+    for(int i = 0; i < idt_size; ++i) ptr[i] = 0;
+
 
     idt_set_gate( 0, (uint32_t)isr0,  0x08, idt_set_flags(1, 0));
     idt_set_gate( 1, (uint32_t)isr1,  0x08, idt_set_flags(1, 0));
@@ -107,10 +110,11 @@ static void init_idt()
 
     idt_flush((uint32_t)&idt_ptr);
 }
-*/
+
+
 void init_descriptor_tables()
 {
     init_gdt();
-//    init_idt();
+    init_idt();
 }
 

@@ -14,8 +14,9 @@ A_FILES = $(SHELL find sources/ -type f -name "*.asm")
 
 all:kaffenos.elf
 
-kaffenos.elf: boot.o kernel.o desc_tabs.o gdt.o terminal.o linker.ld
-	$(CC) $(CFLAGS) -nostdlib -T linker.ld boot.o kernel.o desc_tabs.o gdt.o terminal.o -o kaffenos.elf -lgcc
+kaffenos.elf: boot.o kernel.o desc_tabs.o gdt.o terminal.o linker.ld interrupt.o isr.o
+	$(CC) $(CFLAGS) -nostdlib -T linker.ld boot.o kernel.o desc_tabs.o gdt.o \
+				terminal.o isr.o interrupt.o -o kaffenos.elf -lgcc
 
 kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c kernel.c -o kernel.o
@@ -25,6 +26,12 @@ boot.o: boot.asm
 
 gdt.o: gdt.asm
 	$(ASM) $(AFLAGS) gdt.asm -o gdt.o
+
+interrupt.o: interrupt.asm
+	$(ASM) $(AFLAGS) $^ -o $@
+
+isr.o: isr.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 desc_tabs.o: desc_tabs.c
 	$(CC) $(CFLAGS) -c $^ -o $@

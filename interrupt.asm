@@ -48,7 +48,7 @@ ISR_NOERRCODE 29
 ISR_NOERRCODE 30
 ISR_NOERRCODE 31
 
-[EXTERN irs_handler] ;func written in C
+[EXTERN isr_handler] ;func written in C
 
 isr_common_stub:
     pusha       ;push all general purposes registers on stack
@@ -61,7 +61,7 @@ isr_common_stub:
     mov fs, ax
     mov gs, ax
 
-    call irs_handler
+    call isr_handler
 
     pop eax         ;reload the original data segment descriptor
     mov ds, ax
