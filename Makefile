@@ -1,4 +1,8 @@
-SHELL = /bin/sh
+shell = /bin/sh
+
+#directiories
+BUILD_DIR ?= build/
+SRC_DIR ?= sources/
 
 #tools
 CC=~/opt/cross/bin/i686-elf-gcc
@@ -9,35 +13,25 @@ CFLAGS=-g -std=gnu99 -ffreestanding
 AFLAGS=-felf
 
 #files
-C_FILES = $(SHELL find sources/ -type f -name "*.c")
-A_FILES = $(SHELL find sources/ -type f -name "*.asm")
+FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)
+LINKER=linker.ld
 
-all:kaffenos.elf
+#objects
+OBJS := $(FILES:%=$(BUILD_DIR)/%.o)
 
-kaffenos.elf: boot.o kernel.o desc_tabs.o gdt.o terminal.o linker.ld interrupt.o isr.o
-	$(CC) $(CFLAGS) -nostdlib -T linker.ld boot.o kernel.o desc_tabs.o gdt.o \
-				terminal.o isr.o interrupt.o -o kaffenos.elf -lgcc
+#kernel
+all:$(BUILD_DIR)/kaffenos.elf
 
-kernel.o: kernel.c
-	$(CC) $(CFLAGS) -c kernel.c -o kernel.o
+$(BUILD_DIR)/kaffenos.elf: $(LINKER) $(OBJS)
+	$(CC) $(CFLAGS) -nostdlib -T linker.ld $(OBJS) -o $@ -lgcc
 
-boot.o: boot.asm
-	$(ASM) $(AFLAGS) boot.asm -o boot.o
+#C language
+$(BUILD_DIR)/%.c.o: %.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
-gdt.o: gdt.asm
-	$(ASM) $(AFLAGS) gdt.asm -o gdt.o
-
-interrupt.o: interrupt.asm
+#Assembly
+$(BUILD_DIR)/%.asm.o: %.asm
 	$(ASM) $(AFLAGS) $^ -o $@
 
-isr.o: isr.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-desc_tabs.o: desc_tabs.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-terminal.o:terminal.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
 clean:
-	rm -rf *.o
+	rm -r $(BUILD_DIR)/$(SRC_DIR)/*
