@@ -1,8 +1,19 @@
 #include "desc_tabs.h"
 #include <stdint.h>
+
+//================= DEFINE SECTION ===================
+
+//gdt
 #define LIMIT 0xFFFFFFFF//4 byte mask
 #define B_MASK 0xFFFF   //2 byte mask
 #define S_MASK 0xFF     //1 byte mask
+
+//irq
+#define PIC1 0x20       //pic master adress
+#define PIC2 0xA0       //pic slave adress
+#define ICW1_INIT 0x10  //initialization command
+#define ICW1_ICW4 0x01  //setup in init control word IC4 flag
+
 
 extern void gdt_flush(uint32_t);
 extern void idt_flush(uint32_t);
@@ -13,7 +24,7 @@ gdt_ptr_t gdt_ptr;
 idt_entry_t idt_entries[256];
 idt_ptr_t   idt_ptr; 
 
-//GDT
+// =========================== GDT ======================
 
 static void gdt_set_gate(   uint32_t num,   uint32_t base,
                             uint32_t limit, uint8_t access, uint8_t gran)
@@ -44,7 +55,7 @@ static void init_gdt()
     gdt_flush((uint32_t) &gdt_ptr);
 }
 
-//IDT
+//======================= IDT ======================================
 
 uint8_t idt_set_flags(uint8_t present, uint8_t privilage_lvl)
 {
@@ -63,7 +74,12 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags
    idt_entries[num].always0 = 0;
 
    idt_entries[num].flags   = flags;
-} 
+}
+
+void pic_remap(void)
+{
+
+}
 
 static void init_idt()
 {
@@ -107,6 +123,23 @@ static void init_idt()
     idt_set_gate(29, (uint32_t)isr29, 0x08, idt_set_flags(1, 0));
     idt_set_gate(30, (uint32_t)isr30, 0x08, idt_set_flags(1, 0));
     idt_set_gate(31, (uint32_t)isr31, 0x08, idt_set_flags(1, 0));
+
+    idt_set_gate(32, (uint32_t)irq0,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(33, (uint32_t)irq1,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(34, (uint32_t)irq2,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(35, (uint32_t)irq3,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(36, (uint32_t)irq4,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(37, (uint32_t)irq5,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(38, (uint32_t)irq6,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(39, (uint32_t)irq7,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(40, (uint32_t)irq8,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(41, (uint32_t)irq9,  0x08, idt_set_flags(1, 0));
+    idt_set_gate(42, (uint32_t)irq10, 0x08, idt_set_flags(1, 0));
+    idt_set_gate(43, (uint32_t)irq11, 0x08, idt_set_flags(1, 0));
+    idt_set_gate(44, (uint32_t)irq12, 0x08, idt_set_flags(1, 0));
+    idt_set_gate(45, (uint32_t)irq13, 0x08, idt_set_flags(1, 0));
+    idt_set_gate(46, (uint32_t)irq14, 0x08, idt_set_flags(1, 0));
+    idt_set_gate(47, (uint32_t)irq15, 0x08, idt_set_flags(1, 0));
 
     idt_flush((uint32_t)&idt_ptr);
 }
