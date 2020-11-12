@@ -7,10 +7,15 @@ SRC_DIR ?= sources/
 #tools
 CC=~/opt/cross/bin/i686-elf-gcc
 ASM=nasm
+MKDIR_P ?= mkdir -p
 
 #flags
 CFLAGS=-g -std=gnu99 -ffreestanding
 AFLAGS=-felf
+
+CFLAGS+= -Isources/descriptors_tables
+CFLAGS+= -Isources/terminal
+CFLAGS+= -Isources/interrupts
 
 #files
 FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)
@@ -27,10 +32,12 @@ $(BUILD_DIR)/kaffenos.elf: $(LINKER) $(OBJS)
 
 #C language
 $(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 #Assembly
 $(BUILD_DIR)/%.asm.o: %.asm
+	$(MKDIR_P) $(dir $@)
 	$(ASM) $(AFLAGS) $^ -o $@
 
 clean:
