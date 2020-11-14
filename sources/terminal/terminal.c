@@ -13,6 +13,7 @@ int term_row;
 
 static inline uint16_t vga_entry(unsigned char uc, uint8_t fg, uint8_t bg)
 {
+    //VGA_CHAR BBBBFFFFCCCCCCCC, B-background F-foreground C-ASCII char
     uint16_t color = fg | bg << 4;
     return (uint16_t) color << 8 | (uint16_t) uc;
 };
@@ -25,7 +26,6 @@ void term_init()
         for(int row = 0; row < VGA_ROWS; ++row)
         {
             const size_t index = (VGA_COLS * row) + col;
-            //VGA_CHAR BBBBFFFFCCCCCCCC, B-background F-foreground C-ASCII char
             vga_buffer[index] = vga_entry(' ', 0, 0);
             
         }

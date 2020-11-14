@@ -10,12 +10,13 @@ ASM=nasm
 MKDIR_P ?= mkdir -p
 
 #flags
-CFLAGS=-g -std=gnu99 -ffreestanding
+CFLAGS=-g -std=gnu99 -ffreestanding -Wall
 AFLAGS=-felf
 
 CFLAGS+= -Isources/descriptors_tables
 CFLAGS+= -Isources/terminal
 CFLAGS+= -Isources/interrupts
+CFLAGS+= -Isources/asm_c_funcs
 
 #files
 FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)

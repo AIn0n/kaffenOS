@@ -1,5 +1,6 @@
 #include "desc_tabs.h"
 #include <stdint.h>
+#include "asm_c_funcs.h"
 
 //================= DEFINE SECTION ===================
 
@@ -9,11 +10,13 @@
 #define S_MASK 0xFF     //1 byte mask
 
 //irq
-#define PIC1 0x20       //pic master adress
-#define PIC2 0xA0       //pic slave adress
-#define ICW1_INIT 0x10  //initialization command
-#define ICW1_ICW4 0x01  //setup in init control word IC4 flag
+#define PIC1 0x20               //pic master adress
+#define PIC2 0xA0               //pic slave adress
+#define PIC1_DATA (PIC1 + 1)    //pic master data reg port
+#define PIC2_DATA (PIC2 + 1)    //pic slave data reg port
 
+#define ICW1_INIT 0x10          //initialization command
+#define ICW1_ICW4 0x01          //set IC4 flag in init control word
 
 extern void gdt_flush(uint32_t);
 extern void idt_flush(uint32_t);
@@ -78,7 +81,26 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags
 
 void pic_remap(void)
 {
+    //ICW - first init word
+    outb(PIC1, ICW1_INIT | ICW1_ICW4);
+    outb(PIC1, ICW1_INIT | ICW1_ICW4);
 
+    //ICW2 - vector offsets
+    outb(PIC1_DATA, PIC1);                  
+    outb(PIC2_DATA, (PIC1 + 0x08));         // 0x08 here is offset between pic and pic2
+
+    //ICW3 - cascade PICs
+    outb(PIC1_DATA, 4);     //we set up bit to show pic master which 
+                            //irq line correspond to pic slave( irq2)
+    outb(PIC2_DATA, 2);     //tell pic slave its cascade identity
+
+    //ICW4 - modes/buffers/etc
+    outb(PIC1_DATA, 1);     //setting first bit only to get 8086 mode
+    outb(PIC2_DATA, 1);
+
+    //clearing masks
+    outb(PIC1_DATA, 0);
+    outb(PIC2_DATA, 0);
 }
 
 static void init_idt()
@@ -90,6 +112,7 @@ static void init_idt()
     uint16_t idt_size = sizeof(idt_entry_t) * 256;
     for(int i = 0; i < idt_size; ++i) ptr[i] = 0;
 
+    pic_remap();
 
     idt_set_gate( 0, (uint32_t)isr0,  0x08, idt_set_flags(1, 0));
     idt_set_gate( 1, (uint32_t)isr1,  0x08, idt_set_flags(1, 0));

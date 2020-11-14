@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include_next <stdint.h>
+#include <stdint.h>
 #include "desc_tabs.h"
 #include "terminal.h"
 
