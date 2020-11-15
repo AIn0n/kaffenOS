@@ -12,7 +12,8 @@ uint32_t tick = 0;
 static void timer_callback(registers_t regs)
 {
     ++tick;
-    term_print("XD\n");
+    term_print_int32(tick);     //DEBUG
+    term_print("\n");           //DEBUG
 }
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)

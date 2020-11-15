@@ -10,7 +10,7 @@ ASM=nasm
 MKDIR_P ?= mkdir -p
 
 #flags
-CFLAGS=-g -std=gnu99 -ffreestanding -Wall
+CFLAGS=-g -O0 -std=gnu99 -ffreestanding -Wall
 AFLAGS=-felf
 
 CFLAGS+= -Isources/descriptors_tables

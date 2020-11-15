@@ -17,4 +17,5 @@ gdt_flush:
 idt_flush:
     mov eax, [esp+4]    ;get pointer to IDT passed as c param
     lidt [eax]          ;load idt pointer
+    sti
     ret

@@ -79,7 +79,7 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags
    idt_entries[num].flags   = flags;
 }
 
-void pic_remap(void)
+static void pic_remap(void)
 {
     //ICW - first init word
     outb(PIC1, ICW1_INIT | ICW1_ICW4);
