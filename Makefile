@@ -17,6 +17,8 @@ CFLAGS+= -Isources/descriptors_tables
 CFLAGS+= -Isources/terminal
 CFLAGS+= -Isources/interrupts
 CFLAGS+= -Isources/asm_c_funcs
+CFLAGS+= -Isources/drivers/pit
+CFLAGS+= -Isources/math
 
 #files
 FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)

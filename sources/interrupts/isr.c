@@ -17,7 +17,7 @@ void register_interrupt_handlers(uint8_t n, isr_t handler)
 
 void isr_handler(registers_t regs)
 {
-    term_print("unhandled interrupt");
+    term_print("unhandled interrupt");      //DEBUG
 }
 
 void irq_handler(registers_t regs)

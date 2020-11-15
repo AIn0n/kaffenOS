@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "terminal.h"
+#include "math.h"
 
 //for vga display
 volatile uint16_t* vga_buffer = (uint16_t *) 0xB8000;
@@ -56,4 +57,21 @@ void term_putc(char c)
 
 void term_print(const char* str){
     for(size_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
+}
+
+void term_print_int32(int32_t a)
+{
+    uint8_t minus = 0;
+    int32_t b = a, len = 0;
+
+    if( a < 0) {minus = 1; a = -(a);}   //checking the sign
+    do { b /= 10; ++len;}while(b > 0);  //finding length
+    if(minus) term_putc('-');           //putting "-" if a < 0
+    for(int32_t i = len; i > 0; --i)    //putting every char in for loop
+    {
+        b = a;
+        b /= (int)pow_rec(10, i - 1);
+        b %= 10;
+        term_putc(b + '0');
+    }
 }
