@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "isr.h"
 #include "terminal.h"
-#include "asm_c_funcs.h"
+#include "misc.h"
 
 //irq
 #define PIC1 0x20       //pic master adress
@@ -17,7 +17,9 @@ void register_interrupt_handlers(uint8_t n, isr_t handler)
 
 void isr_handler(registers_t regs)
 {
-    term_print("unhandled interrupt");      //DEBUG
+    term_print("unhandled interrupt ");      //DEBUG
+    term_print_int32(regs.int_no);
+    term_print("\n");
 }
 
 void irq_handler(registers_t regs)

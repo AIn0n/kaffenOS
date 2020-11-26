@@ -3,6 +3,7 @@
 #include "desc_tabs.h"
 #include "terminal.h"
 #include "timer.h"
+#include "keyboard.h"
 
 
 void main (void) 
@@ -12,5 +13,6 @@ void main (void)
     init_descriptor_tables();
     term_print("idt, gdt initialized\n");
     asm volatile ("int $0x03");     //DEBUG
-    init_timer(50, 0, 3, 3);        //timer init
+    //init_timer(50, 0, 3, 3);        //timer init
+    test_PS2_controller();
 }

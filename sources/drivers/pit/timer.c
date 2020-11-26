@@ -1,7 +1,7 @@
 #include "timer.h"
 #include "isr.h"
 #include "terminal.h"
-#include "asm_c_funcs.h"
+#include "misc.h"
 
 #define PIT_IN_FREQ 1193180
 #define PIT_WRITE_PORT 0x43

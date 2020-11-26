@@ -16,8 +16,9 @@ AFLAGS=-felf
 CFLAGS+= -Isources/descriptors_tables
 CFLAGS+= -Isources/terminal
 CFLAGS+= -Isources/interrupts
-CFLAGS+= -Isources/asm_c_funcs
+CFLAGS+= -Isources/misc
 CFLAGS+= -Isources/drivers/pit
+CFLAGS+= -Isources/drivers/keyboard
 CFLAGS+= -Isources/math
 
 #files

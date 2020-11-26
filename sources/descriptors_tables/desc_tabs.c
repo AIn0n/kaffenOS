@@ -1,6 +1,6 @@
 #include "desc_tabs.h"
 #include <stdint.h>
-#include "asm_c_funcs.h"
+#include "misc.h"
 
 //================= DEFINE SECTION ===================
 
@@ -51,7 +51,7 @@ static void init_gdt()
 
     gdt_set_gate(0, 0, 0, 0, 0);
     gdt_set_gate(1, 0, LIMIT, 0x9A, 0xCF);
-    gdt_set_gate(2, 0, LIMIT, 0x92, 0xFC);
+    gdt_set_gate(2, 0, LIMIT, 0x92, 0xCF);
     gdt_set_gate(3, 0, LIMIT, 0xFA, 0xCF);
     gdt_set_gate(4, 0, LIMIT, 0xF2, 0xCF);
     
