@@ -5,9 +5,7 @@
 //================= DEFINE SECTION ===================
 
 //gdt
-#define LIMIT 0xFFFFFFFF//4 byte mask
-#define B_MASK 0xFFFF   //2 byte mask
-#define S_MASK 0xFF     //1 byte mask
+#define LIMIT 0xFFFFFFFF
 
 //irq
 #define PIC1 0x20               //pic master adress

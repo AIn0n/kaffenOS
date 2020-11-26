@@ -27,8 +27,8 @@ void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
     outb(PIT_WRITE_PORT, command);
 
     //divisor is splitted for two bytes
-    uint8_t l = (uint8_t)(divisor & 0xFF);          //low part
-    uint8_t h = (uint8_t)((divisor >> 8) & 0xFF);   //high part
+    uint8_t l = (uint8_t)(divisor & S_MASK);          //low part
+    uint8_t h = (uint8_t)((divisor >> 8) & S_MASK);   //high part
 
     //sending divisor to initialized channel
     outb((PIT_CHNL_0 + channel), l);
