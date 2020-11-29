@@ -14,7 +14,5 @@ void main (void)
     term_print("idt, gdt initialized\n");
     asm volatile ("int $0x03");     //DEBUG
     //init_timer(50, 0, 3, 3);        //timer init only in DEBUG purposes
-    PS2_ctrl_test();
-    PS2_ctrl_flush_out_buff();
-    term_print("PS2 output buffer flushed\n");
+    if(!PS2_init()) term_print("PS/2 controller initialized\n");
 }
