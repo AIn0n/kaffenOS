@@ -2,6 +2,9 @@
 #define _MISC_H_
 #include <stdint.h>
 
+//addresses
+#define NULL ((void *)0)
+
 //values
 #define TRUE 1
 #define FALSE 0

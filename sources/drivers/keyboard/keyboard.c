@@ -3,10 +3,10 @@
 #include "terminal.h"   //only for DEBUG purposes
 #include "isr.h"
 
-
 //keyboard stack and messeges structs and  functions
-#define KBD_BUFF_SIZE 1024
+#define KBD_BUFF_SIZE 512
 
+//struct which in future will tranfer data to userspace programs
 typedef struct
 {
     uint8_t ASCII_char;
@@ -16,19 +16,39 @@ typedef struct
 //FILO stack similar to circular buffer
 typedef struct
 {
-    uint8_t stack[KBD_BUFF_SIZE];
-    uint32_t begin;
-    uint32_t end;
-    uint32_t size;
+    uint8_t     array[KBD_BUFF_SIZE];
+    uint8_t     is_full;
+    uint16_t    begin;
+    uint16_t    end;
+    uint16_t    size;
 } kbd_stack_t;
 
-kbd_stack_t kbd_stack ={.stack = {0}, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};
+//stack init
+kbd_stack_t kbd_stack ={.array = {0}, .is_full = 0, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};
 
-//stack functions are not ready yet
 void
-kbd_stack_push(kbd_stack_t *stack, uint8_t value){}
+kbd_stack_push(kbd_stack_t *stack, uint8_t value)
+{
+    stack->array[stack->end] = value;
+    stack->end = (++stack->end) % stack->size;
+    if(stack->begin == stack->end) stack->is_full = TRUE;
+    if(stack->is_full) stack->begin = stack->end;
+}
 
-
+uint8_t
+kbd_stack_pop(kbd_stack_t *stack, uint8_t *err)
+{
+    uint8_t ret;
+    if(stack->begin != stack->end || stack->is_full)
+    {
+        ret = stack->array[stack->begin];
+        stack->begin = (++stack->begin) % stack->size;
+        if(stack->is_full) stack->is_full = FALSE;
+        if(err != NULL) *err = 0;
+    }
+    else { if(err != NULL) *err = 1;}
+    return ret;
+}
 
 
 /*this function creates proper configurtion byte for 8042 but it's little
@@ -84,9 +104,14 @@ uint8_t PS2_ctrl_read_data(void)
 static 
 void PS2_handler(registers_t regs)
 {
-    term_print("Pressed: ");    //DEBUG
-    term_print_int32(PS2_ctrl_read_data());
-    term_print("\n");           //DEBUG too
+    kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());
+    //DEBUG
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        term_print_int32(kbd_stack.array[i]);
+        term_print(" ");
+    }
+    term_print("\n");
 }
 
 uint8_t PS2_init(void)
