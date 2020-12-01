@@ -3,6 +3,34 @@
 #include "terminal.h"   //only for DEBUG purposes
 #include "isr.h"
 
+
+//keyboard stack and messeges structs and  functions
+#define KBD_BUFF_SIZE 1024
+
+typedef struct
+{
+    uint8_t ASCII_char;
+    uint8_t flag;
+} kbd_msg_t;
+
+//FILO stack similar to circular buffer
+typedef struct
+{
+    uint8_t stack[KBD_BUFF_SIZE];
+    uint32_t begin;
+    uint32_t end;
+    uint32_t size;
+} kbd_stack_t;
+
+kbd_stack_t kbd_stack ={.stack = {0}, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};
+
+//stack functions are not ready yet
+void
+kbd_stack_push(kbd_stack_t *stack, uint8_t value){}
+
+
+
+
 /*this function creates proper configurtion byte for 8042 but it's little
 bit overkill for now, I let her here for maybe futher development of os */
 uint8_t PS2_ctrl_config_byte(   uint8_t intr_1,         //first port interrupts
