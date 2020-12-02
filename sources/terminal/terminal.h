@@ -4,5 +4,5 @@
 void term_init();
 void term_print(const char* str);
 void term_print_int32(int32_t a);
-
+void term_putc(char c);
 #endif

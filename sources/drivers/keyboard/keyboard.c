@@ -3,28 +3,61 @@
 #include "terminal.h"   //only for DEBUG purposes
 #include "isr.h"
 
-//keyboard stack and messeges structs and  functions
-#define KBD_BUFF_SIZE 512
 
-//struct which in future will tranfer data to userspace programs
-typedef struct
+//----------------------------------------this part is taken from other project-------------------------
+//it's not hard, i'm just lazy af
+//source: http://www.osdever.net/bkerndev/Docs/keyboard.htm
+
+/* KBDUS means US Keyboard Layout. This is a scancode table
+*  used to layout a standard US keyboard. I have left some
+*  comments in to give you an idea of what key is what, even
+*  though I set it's array index to 0. You can change that to
+*  whatever you want using a macro, if you wish! */
+uint8_t kbdus[128] =
 {
-    uint8_t ASCII_char;
-    uint8_t flag;
-} kbd_msg_t;
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
+  '9', '0', '-', '=', '\b',	/* Backspace */
+  '\t',			/* Tab */
+  'q', 'w', 'e', 'r',	/* 19 */
+  't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	/* Enter key */
+    0,			/* 29   - Control */
+  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',	/* 39 */
+ '\'', '`',   0,		/* Left shift */
+ '\\', 'z', 'x', 'c', 'v', 'b', 'n',			/* 49 */
+  'm', ',', '.', '/',   0,				/* Right shift */
+  '*',
+    0,	/* Alt */
+  ' ',	/* Space bar */
+    0,	/* Caps lock */
+    0,	/* 59 - F1 key ... > */
+    0,   0,   0,   0,   0,   0,   0,   0,
+    0,	/* < ... F10 */
+    0,	/* 69 - Num lock*/
+    0,	/* Scroll Lock */
+    0,	/* Home key */
+    0,	/* Up Arrow */
+    0,	/* Page Up */
+  '-',
+    0,	/* Left Arrow */
+    0,
+    0,	/* Right Arrow */
+  '+',
+    0,	/* 79 - End key*/
+    0,	/* Down Arrow */
+    0,	/* Page Down */
+    0,	/* Insert Key */
+    0,	/* Delete Key */
+    0,   0,   0,
+    0,	/* F11 Key */
+    0,	/* F12 Key */
+    0,	/* All other keys are undefined */
+};		
 
-//FILO stack similar to circular buffer
-typedef struct
-{
-    uint8_t     array[KBD_BUFF_SIZE];
-    uint8_t     is_full;
-    uint16_t    begin;
-    uint16_t    end;
-    uint16_t    size;
-} kbd_stack_t;
 
-//stack init
-kbd_stack_t kbd_stack ={.array = {0}, .is_full = 0, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};
+
+//-----------------------scancodes stack part------------------------------------------------------
+
+kbd_stack_t kbd_stack ={.array = {0}, .is_full = 0, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};   //stack init
 
 void
 kbd_stack_push(kbd_stack_t *stack, uint8_t value)
@@ -49,6 +82,56 @@ kbd_stack_pop(kbd_stack_t *stack, uint8_t *err)
     else { if(err != NULL) *err = 1;}
     return ret;
 }
+
+//------------------------------------------------messege part--------------------------------------
+
+kbd_msg_t kbd_msg = {.ascii_char = 0, .flag = 0};       //messege init
+
+void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
+{
+    if(stack == NULL || msg == NULL) return;
+    uint8_t err;
+    uint8_t scancode;
+
+    //if stack is empty we waiting to get something in
+    do {
+        scancode = kbd_stack_pop(stack, &err);
+    } while(err);
+    
+    if(GET_BYTE(scancode, 7))           //if last bit is set then we have release key
+    {
+        scancode = kbd_stack_pop(stack, &err);     //next byte will be scan code of currently realesed key
+        switch(scancode)
+        {
+            //here i will do smth with funcs keys like ctr,shift,caps,etc
+            //shift
+            case 0x12: SET_BYTE(msg->flag, 0, FALSE); break;
+        }
+        kbd_msg_get(stack, msg);        //if we get here, we had to update our stack because we get release scancode
+    }
+    else
+    {
+        switch(scancode)
+        {
+            //shift
+            case 0x12: SET_BYTE(msg->flag, 0, TRUE); break;
+            default:
+                msg->ascii_char = kbdus[scancode];
+        }
+    }
+    
+}
+
+//not done yet
+uint8_t getchar(void)
+{
+    kbd_msg_get(&kbd_stack, &kbd_msg);
+
+    
+    return kbd_msg.ascii_char;
+}
+
+//----------------------------------------------------low level part-------------------------------------
 
 
 /*this function creates proper configurtion byte for 8042 but it's little
@@ -105,13 +188,15 @@ static
 void PS2_handler(registers_t regs)
 {
     kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());
-    //DEBUG
-    for(uint8_t i = 0; i < 8; ++i)
+    /*
+        //DEBUG
+    term_print("STACK:");
+    for(uint8_t i = 0; i <  8; ++i)
     {
-        term_print_int32(kbd_stack.array[i]);
+        term_print_int32((int32_t) kbd_stack.array[i]);
         term_print(" ");
     }
-    term_print("\n");
+    */
 }
 
 uint8_t PS2_init(void)
