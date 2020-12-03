@@ -67,6 +67,19 @@ kbd_stack_pop(kbd_stack_t *stack, uint8_t *err)
     return ret;
 }
 
+//function used only in DEBUGging purposes
+static void DEBUG_PRINT_STACK(){
+        //DEBUG
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        if(i == kbd_stack.begin) term_putc('*');
+        if(i == kbd_stack.end) term_putc('>');
+        term_print_uint32(kbd_stack.array[i], 16);
+        term_putc(' ');
+    }
+    term_putc('\n');
+}
+
 //------------------------------------------------messege part--------------------------------------
 
 kbd_msg_t kbd_msg = {.ascii_char = 0, .flag = 0};       //messege init
@@ -78,18 +91,17 @@ void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
     uint8_t scancode;
 
     //if stack is empty we waiting to get something in
-    do {
-        scancode = kbd_stack_pop(stack, &err);
-    } while(err);
+    do { scancode = kbd_stack_pop(stack, &err); } while(err);
     
     if(GET_BYTE(scancode, 7))           //if last bit is set then we have release key
     {
         scancode = kbd_stack_pop(stack, &err);     //next byte will be scan code of currently realesed key
         switch(scancode)
         {
-            //here i will do smth with funcs keys like ctr,shift,caps,etc
-            //shift
+        //shift
             case 0x12: SET_BYTE(msg->flag, 0, FALSE); break;
+        //alt
+            case 0x11: SET_BYTE(msg->flag, 1, FALSE); break;
         }
         kbd_msg_get(stack, msg);        //if we get here, we had to update our stack because we get release scancode
     }
@@ -97,20 +109,23 @@ void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
     {
         switch(scancode)
         {
-            //shift
-            case 0x12: SET_BYTE(msg->flag, 0, TRUE); break;
-            default:
-                msg->ascii_char = kbd_layout[scancode];
+        //shift
+            case 0x12:  SET_BYTE(msg->flag, 0, TRUE);  break;
+        //alt
+            case 0x11:  SET_BYTE(msg->flag, 1, TRUE); break;
+        //char
+            default:    msg->ascii_char = kbd_layout[scancode]; return; //if we get some char we getting out this func
         }
+        kbd_msg_get(stack, msg);    //if we dont get any char we will wait
     }
-    
 }
 
 //not done yet
 uint8_t getchar(void)
 {
     kbd_msg_get(&kbd_stack, &kbd_msg);
-    return kbd_msg.ascii_char;
+    uint8_t ret = kbd_msg.ascii_char;
+    return (ret -((GET_BYTE(kbd_msg.flag, 0)&&(ret >= 'a')&&(ret <= 'z') ?  32 : 0)));
 }
 
 //----------------------------------------------------low level part-------------------------------------
@@ -170,6 +185,7 @@ static
 void PS2_handler(registers_t regs)
 {
     kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());
+
 }
 
 uint8_t PS2_init(void)
