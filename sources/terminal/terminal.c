@@ -75,3 +75,16 @@ void term_print_int32(int32_t a)
         term_putc(b + '0');
     }
 }
+
+void term_print_uint32(int32_t a, uint8_t base)
+{
+    int32_t b = a, len = 0;
+    do { b /= base; ++len;}while(b > 0);  //finding length
+    for(int32_t i = len; i > 0; --i)    //putting every char in for loop
+    {
+        b = a;
+        b /= (int)pow_rec(base, i - 1);
+        b %= base;
+        term_putc(b + ((b>9) ? '7' : '0'));
+    }
+}

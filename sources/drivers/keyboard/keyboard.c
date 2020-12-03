@@ -3,57 +3,41 @@
 #include "terminal.h"   //only for DEBUG purposes
 #include "isr.h"
 
-
-//----------------------------------------this part is taken from other project-------------------------
-//it's not hard, i'm just lazy af
-//source: http://www.osdever.net/bkerndev/Docs/keyboard.htm
-
-/* KBDUS means US Keyboard Layout. This is a scancode table
-*  used to layout a standard US keyboard. I have left some
-*  comments in to give you an idea of what key is what, even
-*  though I set it's array index to 0. You can change that to
-*  whatever you want using a macro, if you wish! */
-uint8_t kbdus[128] =
+//scan code set 2
+//source: https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_2
+uint8_t kbd_layout[128] =
 {
-    0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
-  '9', '0', '-', '=', '\b',	/* Backspace */
-  '\t',			/* Tab */
-  'q', 'w', 'e', 'r',	/* 19 */
-  't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	/* Enter key */
-    0,			/* 29   - Control */
-  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',	/* 39 */
- '\'', '`',   0,		/* Left shift */
- '\\', 'z', 'x', 'c', 'v', 'b', 'n',			/* 49 */
-  'm', ',', '.', '/',   0,				/* Right shift */
-  '*',
-    0,	/* Alt */
-  ' ',	/* Space bar */
-    0,	/* Caps lock */
-    0,	/* 59 - F1 key ... > */
-    0,   0,   0,   0,   0,   0,   0,   0,
-    0,	/* < ... F10 */
-    0,	/* 69 - Num lock*/
-    0,	/* Scroll Lock */
-    0,	/* Home key */
-    0,	/* Up Arrow */
-    0,	/* Page Up */
-  '-',
-    0,	/* Left Arrow */
-    0,
-    0,	/* Right Arrow */
-  '+',
-    0,	/* 79 - End key*/
-    0,	/* Down Arrow */
-    0,	/* Page Down */
-    0,	/* Insert Key */
-    0,	/* Delete Key */
-    0,   0,   0,
-    0,	/* F11 Key */
-    0,	/* F12 Key */
-    0,	/* All other keys are undefined */
-};		
-
-
+    0,              0/*F9*/,        0,              0/*F5*/,
+    0/*F3*/,        0/*F1*/,        0/*F2*/,        0/*F12*/,
+    0,              0/*F10*/,       0/*F8*/,        0/*F6*/,
+    0/*F4*/,        0/*tab*/,       '`',            0,
+    0,              0/*ltf alt*/,   0/*lft shft*/,  0,
+    0/*lft ctrl*/,  'q',            '1',            0,
+    0,              0,              'z',            's',
+    'a',            'w',            '2',            0,
+    0,              'c',            'x',            'd',
+    'e',            '4',            '3',            0,
+    0,              ' ',            'v',            'f',
+    't',            'r',            '5',            0,
+    0,              'n',            'b',            'h',
+    'g',            'y',            '6',            0,
+    0,              0,              'm',            'j',
+    'u',            '7',            '8',            0,
+    0,              ',',            'k',            'i',
+    'o',            '0',            '9',            0,
+    0,              '.',            '/',            'l',
+    ';',            'p',            '-',            0,
+    0,              0,              '\'',           0,
+    '[',            '=',            0,              0,
+    0/*caps lock*/, 0/*rght shft*/, '\n',           ']',
+    0,              '\\',           0,              0,
+    0,              0,              0,              0,
+    0,              0,              0/*backspace*/, 0,
+    0,              '1',            0,              '4',
+    '7',            0,              0,              0,
+    '0',            '.',            '2',            '5',
+    '6',            '8',            0/*escape*/,    0/*numlock*/
+};
 
 //-----------------------scancodes stack part------------------------------------------------------
 
@@ -116,7 +100,7 @@ void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
             //shift
             case 0x12: SET_BYTE(msg->flag, 0, TRUE); break;
             default:
-                msg->ascii_char = kbdus[scancode];
+                msg->ascii_char = kbd_layout[scancode];
         }
     }
     
@@ -126,8 +110,6 @@ void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
 uint8_t getchar(void)
 {
     kbd_msg_get(&kbd_stack, &kbd_msg);
-
-    
     return kbd_msg.ascii_char;
 }
 
@@ -188,15 +170,6 @@ static
 void PS2_handler(registers_t regs)
 {
     kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());
-    /*
-        //DEBUG
-    term_print("STACK:");
-    for(uint8_t i = 0; i <  8; ++i)
-    {
-        term_print_int32((int32_t) kbd_stack.array[i]);
-        term_print(" ");
-    }
-    */
 }
 
 uint8_t PS2_init(void)
