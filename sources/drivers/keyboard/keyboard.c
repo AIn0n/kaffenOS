@@ -32,7 +32,7 @@ uint8_t kbd_layout[128] =
     0/*caps lock*/, 0/*rght shft*/, '\n',           ']',
     0,              '\\',           0,              0,
     0,              0,              0,              0,
-    0,              0,              0/*backspace*/, 0,
+    0,              0,              129/*bckspc*/,  0,
     0,              '1',            0,              '4',
     '7',            0,              0,              0,
     '0',            '.',            '2',            '5',
@@ -41,7 +41,7 @@ uint8_t kbd_layout[128] =
 
 //-----------------------scancodes stack part------------------------------------------------------
 
-kbd_stack_t kbd_stack ={.array = {0}, .is_full = 0, .begin = 0, .end = 0, .size = KBD_BUFF_SIZE};   //stack init
+kbd_stack_t kbd_stack ={.array = {0}, .is_full = 0, .begin = 0, .end = 0, .size = KBD_QUEUE_SIZE};   //stack init
 
 void
 kbd_stack_push(kbd_stack_t *stack, uint8_t value)
@@ -67,65 +67,39 @@ kbd_stack_pop(kbd_stack_t *stack, uint8_t *err)
     return ret;
 }
 
-//function used only in DEBUGging purposes
-static void DEBUG_PRINT_STACK(){
-        //DEBUG
-    for(uint8_t i = 0; i < 8; ++i)
-    {
-        if(i == kbd_stack.begin) term_putc('*');
-        if(i == kbd_stack.end) term_putc('>');
-        term_print_uint32(kbd_stack.array[i], 16);
-        term_putc(' ');
-    }
-    term_putc('\n');
-}
+//---------------------------------------------primitive getchar------------------------------------
 
-//------------------------------------------------messege part--------------------------------------
-
-kbd_msg_t kbd_msg = {.ascii_char = 0, .flag = 0};       //messege init
-
-void kbd_msg_get(kbd_stack_t *stack, kbd_msg_t *msg)
+uint8_t kbd_getchar(uint8_t *flags)
 {
-    if(stack == NULL || msg == NULL) return;
     uint8_t err;
     uint8_t scancode;
+    uint8_t pressed = FALSE;
 
     //if stack is empty we waiting to get something in
-    do { scancode = kbd_stack_pop(stack, &err); } while(err);
+    do{ scancode = kbd_stack_pop(&kbd_stack, &err); }while(err);
     
     if(GET_BYTE(scancode, 7))           //if last bit is set then we have release key
     {
-        scancode = kbd_stack_pop(stack, &err);     //next byte will be scan code of currently realesed key
-        switch(scancode)
-        {
-        //shift
-            case 0x12: SET_BYTE(msg->flag, 0, FALSE); break;
-        //alt
-            case 0x11: SET_BYTE(msg->flag, 1, FALSE); break;
-        }
-        kbd_msg_get(stack, msg);        //if we get here, we had to update our stack because we get release scancode
+        scancode = kbd_stack_pop(&kbd_stack, &err);     //next byte will be scan code of currently realesed key
+        if( scancode != 0x12 && 
+            scancode != 0x11 && 
+            scancode != 0x9D) return 0;
+        pressed = TRUE;
     }
-    else
+    switch(scancode)
     {
-        switch(scancode)
-        {
-        //shift
-            case 0x12:  SET_BYTE(msg->flag, 0, TRUE);  break;
-        //alt
-            case 0x11:  SET_BYTE(msg->flag, 1, TRUE); break;
-        //char
-            default:    msg->ascii_char = kbd_layout[scancode]; return; //if we get some char we getting out this func
-        }
-        kbd_msg_get(stack, msg);    //if we dont get any char we will wait
+        case 0x12: //left shift
+            (SET_BYTE(*flags, 0, pressed));
+            return kbd_getchar(flags);
+        case 0x11: //left alt
+            (SET_BYTE(*flags, 1, pressed));
+            return kbd_getchar(flags);
+        case 0x9D: //left control
+            (SET_BYTE(*flags, 2, pressed));
+            return kbd_getchar(flags);
+        
     }
-}
-
-//not done yet
-uint8_t getchar(void)
-{
-    kbd_msg_get(&kbd_stack, &kbd_msg);
-    uint8_t ret = kbd_msg.ascii_char;
-    return (ret -((GET_BYTE(kbd_msg.flag, 0)&&(ret >= 'a')&&(ret <= 'z') ?  32 : 0)));
+    return kbd_layout[scancode];
 }
 
 //----------------------------------------------------low level part-------------------------------------
@@ -181,12 +155,10 @@ uint8_t PS2_ctrl_read_data(void)
     return inb(PS2_DATA);
 }
 
+//============IRQ HANDLER=====================
 static 
 void PS2_handler(registers_t regs)
-{
-    kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());
-
-}
+{kbd_stack_push(&kbd_stack, PS2_ctrl_read_data());}
 
 uint8_t PS2_init(void)
 {    

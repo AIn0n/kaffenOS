@@ -1,7 +1,8 @@
 #include <stdint.h>
-#include <stddef.h>
 #include "terminal.h"
+#include "keyboard.h"
 #include "math.h"
+#include "misc.h"
 
 //for vga display
 volatile uint16_t* vga_buffer = (uint16_t *) 0xB8000;
@@ -9,8 +10,8 @@ const int VGA_COLS = 80;
 const int VGA_ROWS = 25;
 
 //for terminal
-int term_col;
-int term_row;
+uint32_t term_col;
+uint32_t term_row;
 
 static inline uint16_t vga_entry(unsigned char uc, uint8_t fg, uint8_t bg)
 {
@@ -26,12 +27,11 @@ void term_init()
     {
         for(int row = 0; row < VGA_ROWS; ++row)
         {
-            const size_t index = (VGA_COLS * row) + col;
-            vga_buffer[index] = vga_entry(' ', 0, 0);
-            
+            const uint32_t index = (VGA_COLS * row) + col;
+            vga_buffer[index] = vga_entry(' ', 0, 0);          
         }
     }
-};
+}
 
 void term_putc(char c)
 {
@@ -45,7 +45,7 @@ void term_putc(char c)
         }
     default:
         {
-            const size_t index = (VGA_COLS * term_row) + term_col;
+            const uint32_t index = (VGA_COLS * term_row) + term_col;
             vga_buffer[index] = vga_entry(c, 15, 0);
             ++term_col;
             break;
@@ -56,7 +56,7 @@ void term_putc(char c)
 };
 
 void term_print(const char* str){
-    for(size_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
+    for(uint32_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
 }
 
 void term_print_int32(int32_t a)
@@ -76,7 +76,7 @@ void term_print_int32(int32_t a)
     }
 }
 
-void term_print_uint32(int32_t a, uint8_t base)
+void term_print_uint32(uint32_t a, uint8_t base)
 {
     int32_t b = a, len = 0;
     do { b /= base; ++len;}while(b > 0);  //finding length
@@ -87,4 +87,35 @@ void term_print_uint32(int32_t a, uint8_t base)
         b %= base;
         term_putc(b + ((b>9) ? '7' : '0'));
     }
+}
+
+//--------------primitive readline-------
+
+#define PREADLINE_BUFF_SIZE 64
+char preadline_buff[PREADLINE_BUFF_SIZE] = {' '};
+
+void preadline(void)
+{
+    //saving previous index on a screen
+    uint32_t start_term_col = term_col;
+    uint32_t start_term_row = term_row;
+    uint32_t cmd_curr = 0, cmd_size = PREADLINE_BUFF_SIZE;
+    uint8_t chr = 0, flags = 0;
+    while((chr = kbd_getchar(&flags)) != '\n')
+    {
+        if(chr == 129 && cmd_curr > 0)
+        {
+            preadline_buff[--cmd_curr] = ' ';
+        }
+        else if(chr && chr != 129)
+        {
+            if(GET_BYTE(flags, 0))  chr -= 32;
+            if(cmd_curr != cmd_size)
+                preadline_buff[cmd_curr++] = chr;
+        }
+        term_print(preadline_buff);
+        term_col = start_term_col;
+        term_row = start_term_row;
+    }
+    term_print("\n");
 }

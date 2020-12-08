@@ -5,7 +5,6 @@
 #include "timer.h"
 #include "keyboard.h"
 
-
 void main (void) 
 {
     term_init();
@@ -15,11 +14,5 @@ void main (void)
     asm volatile ("int $0x03");     //DEBUG
     //init_timer(50, 0, 3, 3);        //timer init only in DEBUG purposes
     if(!PS2_init()) term_print("PS/2 controller initialized\n");
-    uint8_t x;
-    for(int i =0; i < 8; ++i)
-    {
-        x = getchar();
-        term_putc(x);
-    }
-    term_putc('\n');
+    preadline();
 }
