@@ -4,6 +4,7 @@
 #include "terminal.h"
 #include "timer.h"
 #include "keyboard.h"
+#include "string.h"
 
 void main (void) 
 {

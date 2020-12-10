@@ -10,7 +10,7 @@
 #define FALSE 0
 
 //shorts funcs
-#define SET_BYTE(var, n, bool)  ((var)|=((bool)<<(n)))
+#define SET_BYTE(var, n, bool)  ((bool) ? ((var)|=((1U)<<(n))):((var)&= ~((1U) << (n))))
 #define GET_BYTE(var, n)        (((var)&((0)|(1)<<(n))) ? 1 : 0)
 
 //masks

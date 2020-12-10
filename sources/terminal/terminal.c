@@ -109,7 +109,7 @@ void preadline(void)
         }
         else if(chr && chr != 129)
         {
-            if(GET_BYTE(flags, 0))  chr -= 32;
+            if(GET_BYTE(flags, 0) == TRUE)  chr -= 32;
             if(cmd_curr != cmd_size)
                 preadline_buff[cmd_curr++] = chr;
         }

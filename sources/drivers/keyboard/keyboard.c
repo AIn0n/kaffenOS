@@ -73,33 +73,40 @@ uint8_t kbd_getchar(uint8_t *flags)
 {
     uint8_t err;
     uint8_t scancode;
-    uint8_t pressed = FALSE;
+    uint8_t realesed = FALSE;
 
     //if stack is empty we waiting to get something in
     do{ scancode = kbd_stack_pop(&kbd_stack, &err); }while(err);
-    
     if(GET_BYTE(scancode, 7))           //if last bit is set then we have release key
     {
         scancode = kbd_stack_pop(&kbd_stack, &err);     //next byte will be scan code of currently realesed key
-        if( scancode != 0x12 && 
-            scancode != 0x11 && 
-            scancode != 0x9D) return 0;
-        pressed = TRUE;
+        switch(scancode)
+        {
+        //left shift
+            case 0x12:  (SET_BYTE(*flags, 0, FALSE)); break;
+        //left alt
+            case 0x11:  (SET_BYTE(*flags, 1, FALSE)); break;
+        //left control
+            case 0x9D:  (SET_BYTE(*flags, 2, FALSE)); break;
+        }
     }
-    switch(scancode)
+    else
     {
-        case 0x12: //left shift
-            (SET_BYTE(*flags, 0, pressed));
-            return kbd_getchar(flags);
-        case 0x11: //left alt
-            (SET_BYTE(*flags, 1, pressed));
-            return kbd_getchar(flags);
-        case 0x9D: //left control
-            (SET_BYTE(*flags, 2, pressed));
-            return kbd_getchar(flags);
-        
+        switch(scancode)
+        {
+        //left shift
+            case 0x12:  (SET_BYTE(*flags, 0, TRUE)); break;
+        //left alt
+            case 0x11:  (SET_BYTE(*flags, 1, TRUE)); break;
+        //left control
+            case 0x9D:  (SET_BYTE(*flags, 2, TRUE)); break;
+        //normal char 
+            default:    
+            return kbd_layout[scancode];
+        }
+
     }
-    return kbd_layout[scancode];
+    return kbd_getchar(flags);
 }
 
 //----------------------------------------------------low level part-------------------------------------
