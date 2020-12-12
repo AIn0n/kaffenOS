@@ -4,6 +4,8 @@
 #include "misc.h"
 
 int32_t strlen(const char *str);
-char* my_strcpy(char *dest, const char *src);
+char* strcpy(char *dest, const char *src);
+void* memset(void *ptr, uint8_t val, uint32_t size);
+int8_t strcmp(const char *str, const char *str2);
 
 #endif

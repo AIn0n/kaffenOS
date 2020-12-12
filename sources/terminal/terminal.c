@@ -3,6 +3,7 @@
 #include "keyboard.h"
 #include "math.h"
 #include "misc.h"
+#include "string.h"
 
 //for vga display
 volatile uint16_t* vga_buffer = (uint16_t *) 0xB8000;
@@ -83,7 +84,7 @@ void term_print_uint32(uint32_t a, uint8_t base)
     for(int32_t i = len; i > 0; --i)    //putting every char in for loop
     {
         b = a;
-        b /= (int)pow_rec(base, i - 1);
+        b /= pow_rec(base, i - 1);
         b %= base;
         term_putc(b + ((b>9) ? '7' : '0'));
     }
@@ -92,15 +93,16 @@ void term_print_uint32(uint32_t a, uint8_t base)
 //--------------primitive readline-------
 
 #define PREADLINE_BUFF_SIZE 64
-char preadline_buff[PREADLINE_BUFF_SIZE] = {' '};
+char preadline_buff[PREADLINE_BUFF_SIZE] = {'\0'};
 
-void preadline(void)
+char* preadline(void)
 {
     //saving previous index on a screen
     uint32_t start_term_col = term_col;
     uint32_t start_term_row = term_row;
     uint32_t cmd_curr = 0, cmd_size = PREADLINE_BUFF_SIZE;
     uint8_t chr = 0, flags = 0;
+    preadline_flush();
     while((chr = kbd_getchar(&flags)) != '\n')
     {
         if(chr == 129 && cmd_curr > 0)
@@ -117,5 +119,9 @@ void preadline(void)
         term_col = start_term_col;
         term_row = start_term_row;
     }
+    preadline_buff[cmd_curr] = '\0';
     term_print("\n");
+    return preadline_buff;
 }
+
+void preadline_flush(void) {memset(preadline_buff, '\0', PREADLINE_BUFF_SIZE);}
