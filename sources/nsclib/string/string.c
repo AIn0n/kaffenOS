@@ -40,19 +40,21 @@ memset(void *ptr, uint8_t val, uint32_t size)
     if(ptr == NULL) return NULL;
     uint8_t *byte_ptr = ptr;
     for(int32_t i = 0; i < size; ++i) byte_ptr[i] = val;
+    return ptr;
 }
 
-//this func returns first whitespace char index from string
-//in case of wrong data it returns -1
-int32_t
-strwhitespace(const char *str)
+//this func returns pointer to first whitespace 
+//char index from string
+//in case of wrong data it returns NULL
+char *
+strwhitespace(char *str)
 {
-    if(str == NULL) return -1;
+    if(str == NULL) return NULL;
     int32_t size = strlen(str);
-    if(size == -1) return -1;
+    if(size == -1) return NULL;
     for(int32_t i = 0; i < size; ++i)
     {
-        if(str[i] == ' ' || str[i] == '\t' || str[i] == '\n') return i;
+        if(str[i] == ' ' || str[i] == '\t' || str[i] == '\n') return (str + i);
     }
-    return -1;
+    return NULL;
 }

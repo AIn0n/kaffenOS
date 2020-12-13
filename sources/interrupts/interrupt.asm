@@ -75,6 +75,7 @@ IRQ 15,  47
 
 [EXTERN isr_handler] ;func written in C
 
+;https://en.wikibooks.org/wiki/X86_Assembly/Other_Instructions
 isr_common_stub:
     pusha       ;push all general purposes registers on stack
     mov ax, ds

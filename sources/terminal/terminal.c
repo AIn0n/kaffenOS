@@ -57,6 +57,7 @@ void term_putc(char c)
 };
 
 void term_print(const char* str){
+    if(str == NULL) return;
     for(uint32_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
 }
 
