@@ -17,11 +17,14 @@ CFLAGS+= -Isources/descriptors_tables
 CFLAGS+= -Isources/terminal
 CFLAGS+= -Isources/interrupts
 CFLAGS+= -Isources/misc
+CFLAGS+= -Isources/pshell
+
 CFLAGS+= -Isources/drivers/pit
 CFLAGS+= -Isources/drivers/keyboard
-CFLAGS+= -Isources/math
-CFLAGS+= -Isources/string
-CFLAGS+= -Isources/pshell
+
+CFLAGS+= -Isources/nsclib/math
+CFLAGS+= -Isources/nsclib/string
+
 
 #files
 FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)
