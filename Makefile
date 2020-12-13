@@ -21,6 +21,7 @@ CFLAGS+= -Isources/drivers/pit
 CFLAGS+= -Isources/drivers/keyboard
 CFLAGS+= -Isources/math
 CFLAGS+= -Isources/string
+CFLAGS+= -Isources/pshell
 
 #files
 FILES := $(shell find $(SRC_DIRS) -name *.c -or -name *.asm)
