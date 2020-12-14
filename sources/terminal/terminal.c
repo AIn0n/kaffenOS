@@ -58,7 +58,26 @@ void term_putc(char c)
 
 void term_print(const char* str){
     if(str == NULL) return;
-    for(uint32_t i = 0; str[i] != '\0'; ++i) term_putc(str[i]);
+    
+    int32_t size = strlen(str);
+    if(size == -1) return;
+    
+    int32_t get_int = -1;
+    uint8_t color = 15;
+
+    for(uint32_t i = 0; i < size; ++i) 
+    {
+        if(str[i] == '$')
+        {
+            get_int = i;
+            continue;
+        }
+        if(get_int != -1)
+        {
+            color = atoi((str + i));
+        }
+        term_putc(str[i]);
+    }
 }
 
 void term_print_int32(int32_t a)
@@ -113,8 +132,15 @@ char* preadline(void)
         else if(chr && chr != 129)
         {
             if(GET_BYTE(flags, 0) == TRUE)  chr -= 32;
-            if(cmd_curr != cmd_size)
+            if(GET_BYTE(flags, 2) == TRUE && chr == 'u')
+            {
+                preadline_flush();
+                cmd_curr = 0;
+            }
+            else if(cmd_curr != cmd_size)
+            {
                 preadline_buff[cmd_curr++] = chr;
+            }
         }
         term_print(preadline_buff);
         term_col = start_term_col;
@@ -125,4 +151,4 @@ char* preadline(void)
     return preadline_buff;
 }
 
-void preadline_flush(void) {memset(preadline_buff, '\0', PREADLINE_BUFF_SIZE);}
+void preadline_flush(void) {memset(preadline_buff, ' ', PREADLINE_BUFF_SIZE);}

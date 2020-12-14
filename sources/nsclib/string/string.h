@@ -8,5 +8,5 @@ char* strcpy(char *dest, const char *src);
 void* memset(void *ptr, uint8_t val, uint32_t size);
 int8_t strcmp(const char *str, const char *str2);
 char* strwhitespace(char *str);
-
+int32_t atoi(const char* args);
 #endif

@@ -5,7 +5,9 @@
 
 char* builtin_funcs_str[] = {
     "help",
-    "shrek"
+    "shrek",
+    "clear",
+    "atoi"
 };
 
 int32_t psh_builtin_num = (sizeof(builtin_funcs_str)/sizeof(char *));
@@ -19,6 +21,12 @@ psh_help(char *args)
         term_print(builtin_funcs_str[i]);
         term_print("\n");
     }
+    return 0;
+}
+
+int32_t clear(char *args)
+{
+    term_init();
     return 0;
 }
 
@@ -41,7 +49,9 @@ shrek(char *args)
 
 int32_t (*builtin_funcs[])(char *) = {
     &psh_help,
-    &shrek
+    &shrek,
+    &clear,
+    &atoi
 };
 
 

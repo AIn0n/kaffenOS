@@ -1,6 +1,5 @@
 #include "keyboard.h"
 #include "misc.h"
-#include "terminal.h"   //only for DEBUG purposes
 #include "isr.h"
 
 //scan code set 2
@@ -89,7 +88,7 @@ uint8_t kbd_getchar(uint8_t *flags)
     //left alt
         case 0x11:  (SET_BYTE(*flags, 1, pressed)); break;
     //left control
-        case 0x9D:  (SET_BYTE(*flags, 2, pressed)); break;
+        case 0x14:  (SET_BYTE(*flags, 2, pressed)); break;
     //normal char 
         default:
         if(pressed == TRUE)    

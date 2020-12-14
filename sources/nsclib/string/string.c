@@ -58,3 +58,21 @@ strwhitespace(char *str)
     }
     return NULL;
 }
+
+int32_t
+atoi(const char* args)
+{
+    int a = 0;
+    uint8_t minus = 0;
+    int32_t len = strlen(args);
+    if(len == -1) return 0;
+    for(uint32_t i = 0; i < len; ++i)
+    {
+        if(args[i] >= '0' && args[i] <= '9')
+        {
+            while(args[i] >= '0' && args[i] <= '9') a = (a * 10) + (args[i++] - '0');
+        }
+        if(args[i] == '-') minus = 1;
+    }
+    return (minus) ? -a : a;
+}
