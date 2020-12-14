@@ -5,5 +5,5 @@
 
 //power with reccurency
 int32_t pow_rec(int32_t a, uint32_t b);
-
+uint16_t uint32_len(uint32_t val, uint8_t base);
 #endif

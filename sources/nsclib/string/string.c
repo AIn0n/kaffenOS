@@ -72,7 +72,9 @@ atoi(const char* args)
         {
             while(args[i] >= '0' && args[i] <= '9') a = (a * 10) + (args[i++] - '0');
         }
-        if(args[i] == '-') minus = 1;
+        else if(args[i] == '-') {minus = 1;}
+        else { break; }
+        
     }
     return (minus) ? -a : a;
 }

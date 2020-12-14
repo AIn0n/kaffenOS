@@ -21,7 +21,8 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t fg, uint8_t bg)
     return (uint16_t) color << 8 | (uint16_t) uc;
 };
 
-void term_init()
+void
+term_init()
 {
     term_col = 0; term_row = 0;
     for(int col = 0; col < VGA_COLS; ++col)
@@ -34,7 +35,8 @@ void term_init()
     }
 }
 
-void term_putc(char c)
+void 
+term_putc(char c, uint8_t fg)
 {
     switch(c)
     {
@@ -47,7 +49,7 @@ void term_putc(char c)
     default:
         {
             const uint32_t index = (VGA_COLS * term_row) + term_col;
-            vga_buffer[index] = vga_entry(c, 15, 0);
+            vga_buffer[index] = vga_entry(c, fg, 0);
             ++term_col;
             break;
         }
@@ -56,14 +58,15 @@ void term_putc(char c)
     if(term_row >= VGA_ROWS){   term_col = 0;   term_row = 0;   }
 };
 
-void term_print(const char* str){
+void 
+term_print(const char* str){
     if(str == NULL) return;
     
     int32_t size = strlen(str);
     if(size == -1) return;
     
     int32_t get_int = -1;
-    uint8_t color = 15;
+    uint8_t color = VGA_WHITE;
 
     for(uint32_t i = 0; i < size; ++i) 
     {
@@ -75,38 +78,52 @@ void term_print(const char* str){
         if(get_int != -1)
         {
             color = atoi((str + i));
+            if(color != -1) { i += uint32_len(color,10) - 1; }
+            else
+            {
+                color = VGA_WHITE;
+                i = get_int;
+            }
+            get_int = -1;
+            continue;
         }
-        term_putc(str[i]);
+        if(str[i] == ' ' || str[i] == '\n') color = VGA_WHITE;
+        term_putc(str[i], color);
     }
 }
 
-void term_print_int32(int32_t a)
+void 
+term_print_int32(int32_t a)
 {
     uint8_t minus = 0;
-    int32_t b = a, len = 0;
+    int32_t b = a;
+    uint16_t len = 0;
 
     if( a < 0) {minus = 1; a = -(a);}   //checking the sign
-    do { b /= 10; ++len;}while(b > 0);  //finding length
-    if(minus) term_putc('-');           //putting "-" if a < 0
-    for(int32_t i = len; i > 0; --i)    //putting every char in for loop
+    len = uint32_len(a, 10);          //finding length
+    if(minus) term_putc('-', VGA_WHITE);           //putting "-" if a < 0
+    for(uint16_t i = len; i > 0; --i)    //putting every char in for loop
     {
         b = a;
         b /= (int)pow_rec(10, i - 1);
         b %= 10;
-        term_putc(b + '0');
+        term_putc(b + '0', VGA_WHITE);
     }
 }
 
-void term_print_uint32(uint32_t a, uint8_t base)
+void
+term_print_uint32(uint32_t a, uint8_t base)
 {
-    int32_t b = a, len = 0;
-    do { b /= base; ++len;}while(b > 0);  //finding length
-    for(int32_t i = len; i > 0; --i)    //putting every char in for loop
+    int32_t b = a;
+    uint16_t len = 0;
+    do { b /= base; ++len;}while(b > 0);  
+    len = uint32_len(b, base);          //finding length
+    for(uint16_t i = len; i > 0; --i)   //putting every char in for loop
     {
         b = a;
         b /= pow_rec(base, i - 1);
         b %= base;
-        term_putc(b + ((b>9) ? '7' : '0'));
+        term_putc(b + ((b>9) ? '7' : '0'), VGA_WHITE);
     }
 }
 
@@ -115,7 +132,8 @@ void term_print_uint32(uint32_t a, uint8_t base)
 #define PREADLINE_BUFF_SIZE 64
 char preadline_buff[PREADLINE_BUFF_SIZE] = {'\0'};
 
-char* preadline(void)
+char* 
+preadline(void)
 {
     //saving previous index on a screen
     uint32_t start_term_col = term_col;
@@ -137,10 +155,7 @@ char* preadline(void)
                 preadline_flush();
                 cmd_curr = 0;
             }
-            else if(cmd_curr != cmd_size)
-            {
-                preadline_buff[cmd_curr++] = chr;
-            }
+            else if(cmd_curr != cmd_size) { preadline_buff[cmd_curr++] = chr; }
         }
         term_print(preadline_buff);
         term_col = start_term_col;
