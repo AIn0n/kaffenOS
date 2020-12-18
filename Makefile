@@ -18,6 +18,7 @@ CFLAGS+= -Isources/terminal
 CFLAGS+= -Isources/interrupts
 CFLAGS+= -Isources/misc
 CFLAGS+= -Isources/pshell
+CFLAGS+= -Isources/scheduler
 
 CFLAGS+= -Isources/drivers/pit
 CFLAGS+= -Isources/drivers/keyboard
