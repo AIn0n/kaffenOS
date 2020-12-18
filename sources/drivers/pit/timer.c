@@ -1,6 +1,5 @@
 #include "timer.h"
 #include "isr.h"
-#include "terminal.h"
 #include "misc.h"
 
 #define PIT_IN_FREQ 1193180
@@ -12,8 +11,6 @@ uint32_t tick = 0;
 static void timer_callback(registers_t regs)
 {
     ++tick;
-    term_print_int32(tick);     //DEBUG
-    term_print("\n");           //DEBUG
 }
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
@@ -33,4 +30,11 @@ void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
     //sending divisor to initialized channel
     outb((PIT_CHNL_0 + channel), l);
     outb((PIT_CHNL_0 + channel), h);
+}
+
+void delay(uint32_t delay_time)
+{
+    uint32_t curr = tick;
+    uint32_t des = tick+delay_time;
+    while(curr < des) {curr = tick;}
 }

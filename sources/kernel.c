@@ -15,8 +15,11 @@ void main (void)
     init_descriptor_tables();
     term_print("$10OK!\n");
     //asm volatile ("int $0x03");     //DEBUG
-    //init_timer(50, 0, 3, 3);        //timer init only in DEBUG purposes
+    init_timer(1, 0, 3, 3);        //timer init only in DEBUG purposes
+    term_print("PIT:");
+    term_print("$10OK\n");
     term_print("PS/2: ");
     if(!PS2_init()) term_print("$10OK!\n");
+    delay(32);
     psh_loop();
 }
