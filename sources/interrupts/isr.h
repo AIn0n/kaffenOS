@@ -18,8 +18,6 @@
 #define IRQ14 46
 #define IRQ15 47
 
-
-
 typedef struct registers
 {
    uint32_t ds;                  // Data segment selector

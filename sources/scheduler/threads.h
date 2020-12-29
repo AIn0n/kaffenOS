@@ -1,19 +1,34 @@
 #ifndef _THREADS_H_
 #define _THREADS_H_
 #include <stdint.h>
+#include "terminal.h"
+
+//----------------------------------STRUCTS FOR THREAD------------------------------------
+
+typedef struct
+{
+   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
+   uint32_t eflags;
+   
+} cpu_state_t;
 
 typedef enum {
-    SLEEP = 0,
-    WORK = 1
-} threat_state;
+    TERMINATED = 0,
+    WAITING = 1,
+    RUNNING = 2,
+    RUNNABLE = 3
+} thread_state;
+
+#define STACK_SIZE 4096
 
 typedef struct {
-    uint32_t esp;   //top of stack
-    uint32_t ds;    //data segment
-    void * next_task;   //currently void, it may changes
-    threat_state state; //cussent state of task
+    cpu_state_t cpu_state;
+    uint8_t stack[STACK_SIZE];
+    thread_state state; //current state of task
     uint32_t prior;
 
-} threat_control_block;
+} thread_control_block;
+
+extern void save_state();
 
 #endif
