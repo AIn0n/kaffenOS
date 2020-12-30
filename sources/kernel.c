@@ -19,7 +19,6 @@ void main (void)
     init_timer(1, 0, 3, 3);        //timer init only in DEBUG purposes
     term_print("PIT:");
     term_print("$10OK\n");
-    save_state();
     term_print("PS/2: ");
     if(!PS2_init()) term_print("$10OK!\n");
     psh_loop();

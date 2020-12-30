@@ -1,12 +1,20 @@
 ;inspired by: https://wiki.osdev.org/Brendan%27s_Multi-tasking_Tutorial
 
-extern state_saver
-global save_state
+global switch_task
+extern current_task_esp
+extern scheduler
 
-save_state:
-    pusha
-    pushf
-    call state_saver
-    popa
-    popf
+
+switch_task:
+
+    pushad
+    pushfd
+
+    mov [current_task_esp + 40], esp
+    call scheduler
+    mov esp, [current_task_esp + 40]
+
+    popfd
+    popad
+
     ret

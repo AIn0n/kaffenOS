@@ -3,14 +3,8 @@
 #include <stdint.h>
 #include "terminal.h"
 
-//----------------------------------STRUCTS FOR THREAD------------------------------------
 
-typedef struct
-{
-   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
-   uint32_t eflags;
-   
-} cpu_state_t;
+//----------------------------------STRUCTS FOR THREAD------------------------------------
 
 typedef enum {
     TERMINATED = 0,
@@ -22,13 +16,28 @@ typedef enum {
 #define STACK_SIZE 4096
 
 typedef struct {
-    cpu_state_t cpu_state;
     uint8_t stack[STACK_SIZE];
-    thread_state state; //current state of task
-    uint32_t prior;
+    thread_state thr_state;
+    uint8_t priority;
 
 } thread_control_block;
 
-extern void save_state();
+#define THREAD_QUEUE_SIZE 256
+
+typedef struct 
+{
+    thread_control_block list[THREAD_QUEUE_SIZE];
+    uint32_t size;
+    uint32_t current_thread_idx;
+} thread_queue_t;
+
+
+//-------------------------------------FUNCS in C--------------------------------------------
+
+void scheduler();
+
+//-------------------------------------FUNCS in assembly-------------------------------------
+
+extern void switch_task();
 
 #endif

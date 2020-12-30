@@ -1,6 +1,7 @@
 #include "timer.h"
 #include "isr.h"
 #include "misc.h"
+#include "threads.h"
 
 #define PIT_IN_FREQ 1193180
 #define PIT_WRITE_PORT 0x43
@@ -11,6 +12,7 @@ uint32_t tick = 0;
 static void timer_callback(registers_t regs)
 {
     ++tick;
+    switch_task();
 }
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
