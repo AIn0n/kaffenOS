@@ -16,6 +16,7 @@ void main (void)
     init_descriptor_tables();
     term_print("$10OK!\n");
     //asm volatile ("int $0x03");     //DEBUG
+    multitasking_init();
     init_timer(1, 0, 3, 3);        //timer init only in DEBUG purposes
     term_print("PIT:");
     term_print("$10OK\n");

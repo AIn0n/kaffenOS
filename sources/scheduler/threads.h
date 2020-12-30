@@ -1,8 +1,6 @@
 #ifndef _THREADS_H_
 #define _THREADS_H_
 #include <stdint.h>
-#include "terminal.h"
-
 
 //----------------------------------STRUCTS FOR THREAD------------------------------------
 
@@ -27,7 +25,6 @@ typedef struct {
 typedef struct 
 {
     thread_control_block list[THREAD_QUEUE_SIZE];
-    uint32_t size;
     uint32_t current_thread_idx;
 } thread_queue_t;
 
@@ -35,6 +32,7 @@ typedef struct
 //-------------------------------------FUNCS in C--------------------------------------------
 
 void scheduler();
+void multitasking_init();
 
 //-------------------------------------FUNCS in assembly-------------------------------------
 

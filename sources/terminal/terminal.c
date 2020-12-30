@@ -116,7 +116,6 @@ term_print_uint32(uint32_t a, uint8_t base)
 {
     int32_t b = a;
     uint16_t len = 0;
-    do { b /= base; ++len;}while(b > 0);  
     len = uint32_len(b, base);          //finding length
     for(uint16_t i = len; i > 0; --i)   //putting every char in for loop
     {
