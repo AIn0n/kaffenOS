@@ -1,46 +1,30 @@
 #include "threads.h"
-#include "terminal.h"
 #include "isr.h"
 
-uint32_t current_task_esp;
-thread_queue_t thrd_queue;
+uint32_t current_task_esp;  //pointer to current task stack
+thread_queue_t thrd_queue;  //queue with tasks
 
-uint32_t cli_counter;
+uint32_t cli_counter;       //this var stores number of cli calling
 
+//---------------various tasks/ints blockers------------------------------
 void cli()
 {
     cli_counter++;
     asm volatile("cli");
 }
-void sti()
-{
-    cli_counter--;
-    if(cli_counter == 0)
-        asm volatile("sti");
-}
 
-extern void switch_task();
+void sti() {if(!(--cli_counter)) asm volatile("sti");}
 
-typedef struct {
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t ebx;
-    uint32_t ebp;
-
-    uint32_t eip1;
-    uint32_t eip2;
-    uint32_t eip3;
-} context;
-
+//----------------------scheduler-----------------------------------------
 void scheduler()
 {
-    //something here is wrong and that's reason why it not working
     thrd_queue.list[thrd_queue.curr_idx].esp = current_task_esp;
     for(uint32_t curr = thrd_queue.begin; curr < thrd_queue.end; ++curr)
     {
-        if(thrd_queue.list[curr].state == RUNNABLE && thrd_queue.curr_idx != curr)
+        if(thrd_queue.list[curr].state == RUNNABLE)
         {
-            thrd_queue.list[thrd_queue.curr_idx].state = RUNNABLE;
+            if(thrd_queue.list[thrd_queue.curr_idx].state == RUNNING)
+                thrd_queue.list[thrd_queue.curr_idx].state = RUNNABLE;
             thrd_queue.curr_idx = curr;
             thrd_queue.list[curr].state = RUNNING;
             current_task_esp = (uint32_t) thrd_queue.list[curr].esp;
@@ -49,6 +33,7 @@ void scheduler()
     }
 }
 
+//--------------------------initialization-------------------------------
 void multitasking_init()
 {
     cli_counter = 0;
@@ -65,7 +50,7 @@ void multitasking_init()
     sti();
 }
 
-//...or maybe here smth i crewed up, idk
+//------------------------------threads funcs--------------------------------------
 void thread_kill(void)
 {
     cli();

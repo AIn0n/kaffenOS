@@ -2,6 +2,10 @@
 #define _THREADS_H_
 #include <stdint.h>
 
+//------------------------------------CONSTS---------------------------------------------
+#define STACK_SIZE 4096
+#define THREAD_QUEUE_SIZE 256
+
 //----------------------------------STRUCTS FOR THREAD------------------------------------
 
 typedef enum {
@@ -11,8 +15,6 @@ typedef enum {
     RUNNABLE = 3
 } thread_state;
 
-#define STACK_SIZE 4096
-
 typedef struct {
     uint8_t stack[STACK_SIZE];
     uint32_t esp;
@@ -20,8 +22,6 @@ typedef struct {
     uint8_t priority;
 
 } thread_control_block;
-
-#define THREAD_QUEUE_SIZE 256
 
 typedef struct 
 {
@@ -31,18 +31,25 @@ typedef struct
     uint32_t end;
 } thread_queue_t;
 
+typedef struct {
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebx;
+    uint32_t ebp;
+
+    uint32_t eip1;
+    uint32_t eip2;
+    uint32_t eip3;
+} context;
 
 //-------------------------------------FUNCS in C--------------------------------------------
-
 void scheduler();
 void multitasking_init();
 uint8_t thread_create(int (*eip) (void *));
 void sti();
 void cli();
 
-
 //-------------------------------------FUNCS in assembly-------------------------------------
-
 extern void switch_task();
 
 #endif
