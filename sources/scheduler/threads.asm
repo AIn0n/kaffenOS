@@ -7,14 +7,18 @@ extern scheduler
 
 switch_task:
 
-    pushad
-    pushfd
+    push ebx
+    push esi
+    push edi
+    push ebp
 
-    mov [current_task_esp + 40], esp
+    mov [current_task_esp], esp
     call scheduler
-    mov esp, [current_task_esp + 40]
+    mov esp, [current_task_esp]
 
-    popfd
-    popad
+    pop ebp
+    pop edi
+    pop esi
+    pop ebx
 
     ret

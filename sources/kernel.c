@@ -7,6 +7,14 @@
 #include "pshell.h"
 #include "threads.h"
 
+
+//DEBUG
+int foo(void * ptr)
+{
+    term_print("boo");
+    return 0;
+}
+
 void main (void) 
 {
     term_init();
@@ -16,11 +24,13 @@ void main (void)
     init_descriptor_tables();
     term_print("$10OK!\n");
     //asm volatile ("int $0x03");     //DEBUG
-    multitasking_init();
+    term_print("PS/2: ");
+    if(!PS2_init()) term_print("$10OK!\n");
     init_timer(1, 0, 3, 3);        //timer init only in DEBUG purposes
     term_print("PIT:");
     term_print("$10OK\n");
-    term_print("PS/2: ");
-    if(!PS2_init()) term_print("$10OK!\n");
+    multitasking_init();
+    thread_create(foo);
+
     psh_loop();
 }

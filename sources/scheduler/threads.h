@@ -15,7 +15,8 @@ typedef enum {
 
 typedef struct {
     uint8_t stack[STACK_SIZE];
-    thread_state thr_state;
+    uint32_t esp;
+    thread_state state;
     uint8_t priority;
 
 } thread_control_block;
@@ -25,7 +26,9 @@ typedef struct {
 typedef struct 
 {
     thread_control_block list[THREAD_QUEUE_SIZE];
-    uint32_t current_thread_idx;
+    uint32_t curr_idx;
+    uint32_t begin;
+    uint32_t end;
 } thread_queue_t;
 
 
@@ -33,6 +36,10 @@ typedef struct
 
 void scheduler();
 void multitasking_init();
+uint8_t thread_create(int (*eip) (void *));
+void sti();
+void cli();
+
 
 //-------------------------------------FUNCS in assembly-------------------------------------
 

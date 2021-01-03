@@ -12,7 +12,9 @@ uint32_t tick = 0;
 static void timer_callback(registers_t regs)
 {
     ++tick;
+    cli();
     if(!(tick%3))switch_task();
+    sti();
 }
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
