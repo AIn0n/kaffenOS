@@ -1,5 +1,5 @@
 #include "threads.h"
-#include "isr.h"
+#include "timer.h"
 
 uint32_t current_task_esp;  //pointer to current task stack
 thread_queue_t thrd_queue;  //queue with tasks
@@ -15,9 +15,34 @@ void cli()
 
 void sti() {if(!(--cli_counter)) asm volatile("sti");}
 
+void sleep(uint64_t ms)
+{
+    cli();
+    uint32_t curr = thrd_queue.curr_idx;
+    thrd_queue.list[curr].wakeup_time = (ms + get_time_since_boot());
+    thrd_queue.list[curr].state = PAUSED;
+    switch_task();
+    sti();
+}
+
 //----------------------scheduler-----------------------------------------
 void scheduler()
 {
+//wakeup some threads if wakeup_time < time_since_boot
+    uint64_t curr_time = get_time_since_boot();
+    for(uint32_t curr = thrd_queue.begin; curr < thrd_queue.end; ++curr)
+    {
+        if(thrd_queue.list[curr].state == PAUSED)
+        {
+            if(thrd_queue.list[curr].wakeup_time < curr_time)
+            {
+                thrd_queue.list[curr].wakeup_time = 0;
+                thrd_queue.list[curr].state = RUNNABLE;
+            }
+        }
+    }
+
+//real scheduler
     thrd_queue.list[thrd_queue.curr_idx].esp = current_task_esp;
     for(uint32_t curr = thrd_queue.begin; curr < thrd_queue.end; ++curr)
     {

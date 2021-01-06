@@ -11,6 +11,7 @@
 //DEBUG
 int foo(void * ptr)
 {
+    sleep(25000);
     term_print("boo");
     return 0;
 }
@@ -35,7 +36,7 @@ void main (void)
 
     //-------------------------------------PIT and contexts switching init------------------------
     multitasking_init();
-    init_timer(1, 0, 3, 3);
+    init_timer(1000, 0, 3, 3);
     term_print("PIT:");
     term_print("$10OK\n");
 

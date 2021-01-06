@@ -7,15 +7,17 @@
 #define PIT_WRITE_PORT 0x43
 #define PIT_CHNL_0 0x40
 
-uint32_t tick = 0;
+uint64_t tick = 0;
 
 static void timer_callback(registers_t regs)
 {
     ++tick;
-    cli();
-    if(!(tick%3))switch_task();
-    sti();
+    cli();                          //lock
+    if(!(tick%3))switch_task();     //schedule
+    sti();                          //unlock
 }
+
+uint64_t get_time_since_boot(void) {return tick;}
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
 {
@@ -34,11 +36,4 @@ void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode)
     //sending divisor to initialized channel
     outb((PIT_CHNL_0 + channel), l);
     outb((PIT_CHNL_0 + channel), h);
-}
-
-void delay(uint32_t delay_time)
-{
-    uint32_t curr = tick;
-    uint32_t des = tick+delay_time;
-    while(curr < des) {curr = tick;}
 }

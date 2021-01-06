@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 void init_timer(uint32_t freq, uint8_t channel, uint8_t access, uint8_t mode);
-void delay(uint32_t delay_time);
+uint64_t get_time_since_boot(void);
 
 #endif

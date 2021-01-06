@@ -12,7 +12,8 @@ typedef enum {
     TERMINATED = 0,
     WAITING = 1,
     RUNNING = 2,
-    RUNNABLE = 3
+    RUNNABLE = 3,
+    PAUSED = 4
 } thread_state;
 
 typedef struct {
@@ -20,7 +21,7 @@ typedef struct {
     uint32_t esp;
     thread_state state;
     uint8_t priority;
-
+    uint64_t wakeup_time;
 } thread_control_block;
 
 typedef struct 
@@ -43,11 +44,18 @@ typedef struct {
 } context;
 
 //-------------------------------------FUNCS in C--------------------------------------------
-void scheduler();
-void multitasking_init();
-uint8_t thread_create(int (*eip) (void *));
-void sti();
-void cli();
+    
+    //----------scheduling, init, etc------------
+    void scheduler();
+    void multitasking_init();
+    
+    //------------blocking scheduler-------------
+    void sti();
+    void cli();
+    
+    //--------------task funcs-------------------
+    uint8_t thread_create(int (*eip) (void *));
+    void sleep(uint64_t ms);
 
 //-------------------------------------FUNCS in assembly-------------------------------------
 extern void switch_task();
