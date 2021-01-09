@@ -126,6 +126,21 @@ term_print_uint32(uint32_t a, uint8_t base)
     }
 }
 
+void
+term_print_int_at(uint32_t a, uint8_t base, uint8_t x, uint8_t y)
+{
+    if(x > VGA_COLS || y > VGA_ROWS) return;
+    uint32_t start_term_col = term_col;
+    uint32_t start_term_row = term_row;
+    term_row = y;
+    term_col = x;
+
+    term_print_uint32(a, base);
+
+    term_col = start_term_col;
+    term_row = start_term_row;
+}
+
 //--------------primitive readline-------
 
 #define PREADLINE_BUFF_SIZE 64

@@ -12,9 +12,9 @@ uint64_t tick = 0;
 static void timer_callback(registers_t regs)
 {
     ++tick;
-    cli();                          //lock
-    if(!(tick%3))switch_task();     //schedule
-    sti();                          //unlock
+    cli();          //lock
+    switch_task();  //schedule
+    sti();          //unlock
 }
 
 uint64_t get_time_since_boot(void) {return tick;}

@@ -7,14 +7,32 @@
 #include "pshell.h"
 #include "threads.h"
 
+//SOMETHING NOT QUITE WORKING YET! Timers are doing weird things
 
 //DEBUG
 semaphore_t semaphore = SEMAPHORE_INIT(1);
 
 int foo(void * ptr)
 {
-    sleep(25000);
-    term_print("boo");
+    for(uint32_t counter = 0;counter < 100; ++counter)
+    {
+        sleep(500);
+        semaphore_lock(semaphore);
+        term_print_int_at(counter, 10, 20, 10);
+        semaphore_unlock(semaphore);
+    }
+    return 0;
+}
+
+int boo(void * ptr)
+{
+    for(uint32_t counter = 0;counter < 100; ++counter)
+    {
+        sleep(1000);
+        semaphore_lock(semaphore);
+        term_print_int_at(counter, 10, 20, 11);
+        semaphore_unlock(semaphore);
+    }
     return 0;
 }
 
@@ -44,6 +62,7 @@ void main (void)
 
     //----------------------------------------code done before shell------------------------------
     thread_create(foo);
+    thread_create(boo);
 
     //-----------------------------------------shell----------------------------------------------
     psh_loop();
