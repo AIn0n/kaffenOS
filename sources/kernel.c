@@ -9,6 +9,8 @@
 
 
 //DEBUG
+semaphore_t semaphore = SEMAPHORE_INIT(1);
+
 int foo(void * ptr)
 {
     sleep(25000);

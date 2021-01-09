@@ -1,5 +1,6 @@
 #include "threads.h"
 #include "timer.h"
+#include "misc.h"
 
 uint32_t current_task_esp;  //pointer to current task stack
 thread_queue_t thrd_queue;  //queue with tasks
@@ -15,14 +16,45 @@ void cli()
 
 void sti() {if(!(--cli_counter)) asm volatile("sti");}
 
+void semaphore_lock(semaphore_t semaphore)
+{
+    cli();
+    uint32_t curr = thrd_queue.curr_idx;
+    semaphore.thrds[curr] = TRUE;
+    if(semaphore.entry_counter > semaphore.max_entries)
+    {
+        thrd_queue.list[curr].state = WAITING;
+        sti();
+        switch_task();
+    }
+    else { semaphore.entry_counter++; }
+}
+
+void semaphore_unlock(semaphore_t semaphore)
+{
+    cli();
+    uint8_t smth_is_waiting = FALSE;
+    for(int i = 0; i < THREAD_QUEUE_SIZE; ++i)
+    {
+        if(semaphore.thrds[i] == TRUE)
+        {
+            smth_is_waiting = i;
+            break;
+        }
+    }
+    if(smth_is_waiting) { thrd_queue.list[smth_is_waiting].state = RUNNABLE; }
+    else { semaphore.entry_counter--; }
+    sti();
+}
+
 void sleep(uint64_t ms)
 {
     cli();
     uint32_t curr = thrd_queue.curr_idx;
     thrd_queue.list[curr].wakeup_time = (ms + get_time_since_boot());
     thrd_queue.list[curr].state = PAUSED;
-    switch_task();
     sti();
+    switch_task();
 }
 
 //----------------------scheduler-----------------------------------------
@@ -80,8 +112,8 @@ void thread_kill(void)
 {
     cli();
     thrd_queue.list[thrd_queue.curr_idx].state = TERMINATED;
-    switch_task();
     sti();
+    switch_task();
 }
 
 uint8_t thread_create(int (*eip) (void *))
