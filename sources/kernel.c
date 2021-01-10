@@ -7,8 +7,6 @@
 #include "pshell.h"
 #include "threads.h"
 
-//SOMETHING NOT QUITE WORKING YET! Timers are doing weird things
-
 //DEBUG
 semaphore_t semaphore = SEMAPHORE_INIT(1);
 

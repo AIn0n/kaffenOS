@@ -53,8 +53,8 @@ void sleep(uint64_t ms)
     uint32_t curr = thrd_queue.curr_idx;
     thrd_queue.list[curr].wakeup_time = (ms + get_time_since_boot());
     thrd_queue.list[curr].state = PAUSED;
-    sti();
     switch_task();
+    sti();
 }
 
 //----------------------scheduler-----------------------------------------
@@ -76,7 +76,8 @@ void scheduler()
 
 //real scheduler
     thrd_queue.list[thrd_queue.curr_idx].esp = current_task_esp;
-    for(uint32_t curr = thrd_queue.begin; curr < thrd_queue.end; ++curr)
+    for(uint32_t curr = ((thrd_queue.curr_idx + 1) % thrd_queue.end); 
+    curr != thrd_queue.curr_idx; curr = ((curr + 1) % thrd_queue.end))
     {
         if(thrd_queue.list[curr].state == RUNNABLE)
         {
@@ -112,12 +113,13 @@ void thread_kill(void)
 {
     cli();
     thrd_queue.list[thrd_queue.curr_idx].state = TERMINATED;
-    sti();
     switch_task();
+    sti();
 }
 
 uint8_t thread_create(int (*eip) (void *))
 {
+    cli();
     if(thrd_queue.end > THREAD_QUEUE_SIZE) return 2;
     uint32_t curr = thrd_queue.end++;
     
@@ -136,5 +138,6 @@ uint8_t thread_create(int (*eip) (void *))
     ctx->eip2 = (uint32_t) eip;
     ctx->eip3 = (uint32_t) thread_kill;
     thrd_queue.list[curr].state = RUNNABLE;
+    sti();
     return 0;
 }
