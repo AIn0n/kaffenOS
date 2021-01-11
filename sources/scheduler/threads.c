@@ -66,7 +66,7 @@ void scheduler()
     {
         if(thrd_queue.list[curr].state == PAUSED)
         {
-            if(thrd_queue.list[curr].wakeup_time < curr_time)
+            if(thrd_queue.list[curr].wakeup_time <= curr_time)
             {
                 thrd_queue.list[curr].wakeup_time = 0;
                 thrd_queue.list[curr].state = RUNNABLE;

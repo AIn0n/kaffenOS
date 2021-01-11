@@ -14,10 +14,11 @@ int foo(void * ptr)
 {
     for(uint32_t counter = 0;counter < 100; ++counter)
     {
-        sleep(500);
         semaphore_lock(semaphore);
         term_print_int_at(counter, 10, 20, 10);
         semaphore_unlock(semaphore);
+        sleep(500);
+
     }
     return 0;
 }
@@ -26,10 +27,10 @@ int boo(void * ptr)
 {
     for(uint32_t counter = 0;counter < 100; ++counter)
     {
-        sleep(1000);
         semaphore_lock(semaphore);
         term_print_int_at(counter, 10, 20, 11);
         semaphore_unlock(semaphore);
+        sleep(1000);
     }
     return 0;
 }
